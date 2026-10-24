@@ -1,0 +1,10 @@
+node_modules/
+out/
+whisper.cpp/
+.cache/
+.DS_Store
+# Your own footage, cut-outs and transcripts stay on your machine.
+public/*
+!public/fonts/
+!public/lens-map.png
+!public/LIESMICH.md
