@@ -1,108 +1,105 @@
-# Video-Effekte für Claude
+# Video Effects for Claude
 
-21 Video-Effekte für Sprechvideos im Hochformat. Du sagst im Video, was passieren soll. Claude Code
-schneidet dein Video, setzt Untertitel für jedes Wort und baut jeden Effekt genau an die Stelle, an der
-du ihn nennst.
+21 video effects for vertical talking-head videos. You say in the video what should happen. Claude Code
+edits your video, captions every word and places each effect exactly where you mention it.
 
-Ich habe die Effekte für eines meiner Videos gebaut und daraus dieses Repo gemacht, damit du sie in
-deinen eigenen Videos nutzen kannst. Kein Schnittprogramm nötig.
+I built these effects for one of my own videos and turned them into this repo so you can use them in
+your videos too. No editing software needed.
 
-## Was du brauchst
+## What you need
 
-- **Claude Code** mit einem Claude-Abo, am besten mit dem stärksten Modell und hohem Effort
-- **Mac oder Linux.** Windows geht auch, ein paar Schritte macht Claude dort von Hand
-- **Node.js** ab Version 18 und **ffmpeg**. Fehlt etwas, sagt Claude dir Bescheid
-- Rund **5 GB freien Speicher** (Spracherkennung und Freistellung laden beim ersten Mal ihre Modelle)
+- **Claude Code** with a Claude subscription, ideally with the strongest model and a high effort setting
+- **Mac or Linux.** Windows works as well; Claude does a few steps there by hand
+- **Node.js** 18 or later and **ffmpeg**. If something is missing, Claude will tell you
+- About **5 GB of free disk space** (speech recognition and the cut-out download their models the first time)
 
-## Installation mit Claude
+## Install with Claude
 
-Öffne Claude Code und füge diesen Prompt ein:
+Open Claude Code and paste this prompt:
 
 ```text
-Installiere die Video-Effekte aus https://github.com/KenoMedien/claude-video-effects. Lies dafür die README im Repo und führ den Abschnitt „Installation für Claude“ aus. Prüf danach selbst, dass alles läuft, und sag mir, wenn du etwas von mir brauchst.
+Install the video effects from https://github.com/KenoMedien/claude-video-effects. Read the README in the repo and follow the section "Installation for Claude". Then check yourself that everything works, and tell me if you need anything from me.
 ```
 
-## Installation für Claude
+## Installation for Claude
 
-Diese Schritte führt Claude aus. Vor jeder Installation eines Programms (zum Beispiel ffmpeg) fragt
-Claude den Nutzer.
+Claude runs these steps. Before installing any program (for example ffmpeg), Claude asks the user.
 
-1. Repo holen: `git clone https://github.com/KenoMedien/claude-video-effects.git ~/claude-video-effects`
+1. Get the repo: `git clone https://github.com/KenoMedien/claude-video-effects.git ~/claude-video-effects`
    (Windows: `%USERPROFILE%\claude-video-effects`)
-2. Im Repo-Ordner `npm install` ausführen.
-3. Prüfen: `node -v` (ab 18), `ffmpeg -version`. Fehlt ffmpeg: Mac `brew install ffmpeg`,
-   Windows `winget install ffmpeg`, Linux über den Paketmanager. Erst nach dem Ja des Nutzers.
-4. Skill einrichten: `bash scripts/install-skill.sh`. Das kopiert `skill/` nach
-   `~/.claude/skills/video-effects/` und trägt dort den Repo-Pfad ein. Windows ohne bash: die drei
-   Dateien aus `skill/` nach `%USERPROFILE%\.claude\skills\video-effects\` kopieren und in allen dreien
-   `{{REPO}}` durch den vollen Repo-Pfad ersetzen.
-5. Gegenprobe: `npm run typecheck` muss ohne Fehler durchlaufen.
-6. Dem Nutzer sagen: Die Effekte sind bereit. Falls Claude den Skill `video-effects` nicht sofort kennt,
-   Claude Code einmal neu starten. Spracherkennung und Freistellung werden erst beim ersten Video geladen.
+2. Run `npm install` in the repo folder.
+3. Check: `node -v` (18 or later), `ffmpeg -version`. If ffmpeg is missing: Mac `brew install ffmpeg`,
+   Windows `winget install ffmpeg`, Linux via the package manager. Only after the user says yes.
+4. Set up the skill: `bash scripts/install-skill.sh`. This copies `skill/` to
+   `~/.claude/skills/video-effects/` and writes the repo path into it. Windows without bash: copy the
+   three files from `skill/` to `%USERPROFILE%\.claude\skills\video-effects\` and replace `{{REPO}}` in
+   all three with the full repo path.
+5. Sanity check: `npm run typecheck` has to pass without errors.
+6. Tell the user: the effects are ready. If Claude does not know the `video-effects` skill right away,
+   restart Claude Code once. Speech recognition and the cut-out are only downloaded with the first video.
 
-## So benutzt du es
+## How to use it
 
-1. **Aufnehmen.** Hochformat, ruhig stehen, gutes Licht. Sag die Effekte einfach im Video an, zum
-   Beispiel: „Jetzt zerspringt das Bild wie Glas.“ oder „Hinter mir steht jetzt ein riesiges Wort.“
-2. **Tipp:** Filme am Ende zwei Sekunden das leere Zimmer, ohne dich, Kamera nicht bewegen. Damit sehen
-   „Text hinter mir“, „Schlagzeilen-Sturm“ und „Dolly Zoom“ am saubersten aus.
-3. **Claude die Datei geben:**
+1. **Record.** Vertical format, stand still, good light. Just announce the effects in the video, for
+   example: "Now the picture shatters like glass." or "Behind me there is a giant word now."
+2. **Tip:** At the end, film two seconds of the empty room without yourself, and do not move the camera.
+   That makes "Text behind me", "Headline storm" and "Dolly zoom" look cleanest.
+3. **Give Claude the file:**
 
    ```text
-   Schneide mein Video rohvideo.mov im Hochformat. Setze Untertitel für jedes Wort und bau jeden Effekt genau an der Stelle ein, an der ich ihn nenne.
+   Edit my video raw-video.mov in vertical format. Caption every word and add each effect exactly where I mention it.
    ```
 
-Claude zeigt dir vorher, welche Effekte wo landen. Am Ende liegt das fertige Video in `out/`. Mit
-`npm run studio` siehst du es im Browser und kannst Stellen ändern lassen.
+Claude shows you beforehand which effect lands where. At the end the finished video is in `out/`. With
+`npm run studio` you can watch it in the browser and ask for changes at any point.
 
-## Die 21 Effekte
+## The 21 effects
 
-| Nr. | Effekt | Was passiert |
+| No. | Effect | What happens |
 |---|---|---|
-| 01 | Green Screen | Studio-Grün hinter dir, dann öffnet sich ein Foto |
-| 02 | Magazin-Cover | du als Titelbild, der Titel steht hinter deinem Kopf |
-| 03 | Chat-Übernahme | dein Video schrumpft in eine Chat-Nachricht |
-| 04 | Wachstumskurve | eine leuchtende Kurve schießt hinter dir nach oben |
-| 05 | Glasbruch | das Bild bekommt Risse und zerfällt in Scherben |
-| 06 | Orbit | Symbole kreisen um deinen Kopf, hinten hinter dir |
-| 07 | Dolly Zoom | du bleibst gleich groß, der Raum zieht sich zusammen |
-| 08 | Paper Cutout | du als Papierausschnitt mit weißem Rand |
-| 09 | Schlagzeilen-Sturm | Eilmeldungen fliegen ein und laufen hinter dir |
-| 10 | Handy-Mockup | dein Video schrumpft in ein Handy |
-| 11 | Snap Zoom | blitzschneller Sprung auf dein Gesicht |
-| 12 | Studio-Reveal | im dunklen Studio geht das Licht an |
-| 13 | Liquid Glass | eine Glaslinse gleitet übers Bild |
-| 14 | Zoom-Portal | die Kamera fliegt in einen Kreis hinein |
-| 15 | B-Roll-Overlay | ein Schnittprogramm fährt herauf, dein Video läuft darin |
-| 16 | Text hinter mir | ein riesiges Wort steht hinter dir |
-| 17 | Digital Zoom | Kamerasucher mit REC, dann Zoom |
-| 18 | Rahmen-Ausbruch | du steigst aus deinem eigenen Bild |
-| 19 | Zoom-Schnitt | unscharfer Zoom hinein und wieder heraus |
-| 20 | Häkchen-Pop | Pillen mit Haken neben deinem Kopf |
-| 21 | Checkliste | alle Effekte werden abgehakt |
+| 01 | Green screen | studio green behind you, then a photo opens up |
+| 02 | Magazine cover | you as the cover, the masthead sits behind your head |
+| 03 | Chat takeover | your video shrinks into a chat message |
+| 04 | Growth curve | a glowing curve shoots up behind you |
+| 05 | Glass break | the picture cracks and falls apart in shards |
+| 06 | Orbit | icons circle your head, passing behind you |
+| 07 | Dolly zoom | you keep your size, the room contracts |
+| 08 | Paper cutout | you as a paper cut-out with a white edge |
+| 09 | Headline storm | breaking-news bands fly in and run behind you |
+| 10 | Phone mock-up | your video shrinks into a phone |
+| 11 | Snap zoom | a lightning-fast jump onto your face |
+| 12 | Studio reveal | the lights switch on in a dark studio |
+| 13 | Liquid glass | a glass lens glides over the picture |
+| 14 | Zoom portal | the camera flies into a circle |
+| 15 | B-roll overlay | an editing program slides up, your video plays inside it |
+| 16 | Text behind me | a giant word stands behind you |
+| 17 | Digital zoom | camera viewfinder with REC, then a zoom |
+| 18 | Frame escape | you climb out of your own picture |
+| 19 | Zoom cut | a blurred zoom in and back out |
+| 20 | Check pop | pills with check marks above your head |
+| 21 | Checklist | every effect gets ticked off |
 
-Dir fehlt ein Effekt? Beschreib ihn Claude in einem Satz. Die 21 Effekte zeigen Claude, wie so etwas
-gebaut wird. Farben und Texte lassen sich ändern, Einzelheiten in `skill/katalog.md`.
+Missing an effect? Describe it to Claude in one sentence. The 21 effects show Claude how something like
+that is built. Colours and texts can be changed; details in `skill/catalog.md`.
 
-## Was im Repo liegt
+## What is in the repo
 
-| Ordner | Inhalt |
+| Folder | Contents |
 |---|---|
-| `skill/` | die Anleitung für Claude: Ablauf, Effekt-Katalog, Freistellung |
-| `src/effects/` | die 21 Effekte (Remotion, TypeScript) und die Farben |
-| `src/project.ts` | die eine Datei, die Claude pro Video ausfüllt |
-| `scripts/` | Spracherkennung, Freistellung, Standbilder, Skill-Installation |
-| `public/` | hier landen dein Video und die Zwischendateien; sie bleiben auf deinem Rechner |
+| `skill/` | the instructions for Claude: workflow, effect catalog, cut-out |
+| `src/effects/` | the 21 effects (Remotion, TypeScript) and the colours |
+| `src/project.ts` | the one file Claude fills in per video |
+| `scripts/` | speech recognition, cut-out, stills, skill installation |
+| `public/` | your video and intermediate files go here; they stay on your machine |
 
-## Lizenzen
+## Licenses
 
-- **Dieses Repo:** MIT, siehe [LICENSE](LICENSE).
-- **Remotion** (rendert die Videos) hat eine eigene Lizenz: kostenlos für Einzelpersonen, Firmen bis
-  drei Mitarbeitende und gemeinnützige Organisationen, größere Firmen brauchen eine Firmenlizenz.
-  Einzelheiten: [remotion.dev/license](https://www.remotion.dev/license).
-- **Montserrat** (Schrift): SIL Open Font License 1.1, siehe `public/fonts/OFL-Montserrat.txt`.
-- **whisper.cpp** (Spracherkennung): MIT. Wird beim ersten Abtippen geladen und ist nicht Teil dieses Repos.
-- **RobustVideoMatting** (Freistellung): GPL-3.0. Wird mit `scripts/setup-rvm.sh` geladen und ist nicht
-  Teil dieses Repos.
+- **This repo:** MIT, see [LICENSE](LICENSE).
+- **Remotion** (renders the videos) has its own license: free for individuals, companies with up to
+  three employees and non-profit organisations; larger companies need a company license.
+  Details: [remotion.dev/license](https://www.remotion.dev/license).
+- **Montserrat** (font): SIL Open Font License 1.1, see `public/fonts/OFL-Montserrat.txt`.
+- **whisper.cpp** (speech recognition): MIT. Downloaded the first time you transcribe; not part of this repo.
+- **RobustVideoMatting** (cut-out): GPL-3.0. Downloaded by `scripts/setup-rvm.sh`; not part of this repo.
 
-Gebaut von Robin Csipke. Mehr Videos zu Claude und KI: Instagram und TikTok `@robincsipke`.
+Built by Robin Csipke. More videos about Claude and AI: Instagram and TikTok `@robincsipke`.

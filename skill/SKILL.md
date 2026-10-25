@@ -1,101 +1,103 @@
 ---
 name: video-effects
-description: Schneidet ein Sprechvideo im Hochformat, setzt Untertitel für jedes Wort und baut 21 Video-Effekte (Green Screen, Magazin-Cover, Glasbruch, Orbit, Dolly Zoom, Text hinter mir, Rahmen-Ausbruch und weitere) genau an die Stelle, an der die Person sie im Video ausspricht. Nutzen bei „schneide mein Video“, „bau die Effekte ein“, „Video-Effekte“, „Text hinter mir“, „Green Screen“, „Freistellung“ oder wenn jemand ein Rohvideo mit angesagten Effekten übergibt.
+description: Edits a vertical talking-head video, captions every word and places 21 video effects (green screen, magazine cover, glass break, orbit, dolly zoom, text behind me, frame escape and more) exactly where the person mentions them in the video. Use for "edit my video", "add the effects", "video effects", "text behind me", "green screen", "cut-out", or when someone hands over a raw video with spoken effect cues.
 ---
 
-# Video-Effekte
+# Video effects
 
-Das Remotion-Projekt liegt in `{{REPO}}`. Alle Befehle laufen dort. Die Effekte stehen in
-`src/effects/effects.tsx`, pro Video wird nur `src/project.ts` geändert. Die Liste aller Effekte mit
-Feldern und Zutaten steht in [katalog.md](katalog.md), die Freistellung in [freistellung.md](freistellung.md).
+The Remotion project lives in `{{REPO}}`. All commands run there. The effects are in
+`src/effects/effects.tsx`; per video only `src/project.ts` changes. The list of all effects with their
+fields and ingredients is in [catalog.md](catalog.md), the cut-out in [matting.md](matting.md).
 
-Sprich mit dem Nutzer einfach und ohne Fachwörter. Er muss kein Schnittprogramm kennen.
+Talk to the user simply and without jargon, in their language. They do not need to know any editing
+software.
 
-## Ablauf
+## Workflow
 
-1. **Werkzeuge prüfen.** `node -v` (ab 18), `ffmpeg -version`, `ffprobe -version`. Fehlt `node_modules` in
-   `{{REPO}}`, `npm install` ausführen. Fehlt ffmpeg, dem Nutzer den passenden Weg nennen (Mac:
-   `brew install ffmpeg`, Windows: `winget install ffmpeg`) und erst nach seinem Ja installieren.
+1. **Check the tools.** `node -v` (18 or later), `ffmpeg -version`, `ffprobe -version`. If `node_modules` is
+   missing in `{{REPO}}`, run `npm install`. If ffmpeg is missing, tell the user the right way to get it
+   (Mac: `brew install ffmpeg`, Windows: `winget install ffmpeg`) and install only after they say yes.
 
-2. **Video vorbereiten.** Die Datei nach `public/` holen und auf Hochformat 1080 × 1920 mit fester
-   Bildrate bringen. Handyvideos haben oft eine schwankende Bildrate, das verschiebt sonst Effekte:
+2. **Prepare the video.** Copy the file into `public/` and convert it to vertical 1080 × 1920 with a
+   constant frame rate. Phone videos often have a variable frame rate, which would otherwise shift the
+   effects:
 
    ```bash
-   ffmpeg -i <eingang> -vf "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30" \
-     -c:v libx264 -crf 18 -preset medium -c:a aac -b:a 192k public/<name>-roh.mp4
+   ffmpeg -i <input> -vf "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30" \
+     -c:v libx264 -crf 18 -preset medium -c:a aac -b:a 192k public/<name>-raw.mp4
    ```
 
-3. **Abtippen.** `node scripts/transcribe.mjs <name>-roh.mp4 de` schreibt Wortzeiten nach
-   `public/<name>-roh-captions.json`. Beim ersten Lauf lädt das Skript whisper.cpp und das Sprachmodell
-   (rund 1,5 GB); das dem Nutzer vorher sagen. Den Ordner `whisper.cpp/` nie von Hand anlegen und kein
-   Modell vorab hineinlegen: Existiert der Ordner ohne fertiges Programm, bricht die Installation ab.
-   Dann den Ordner löschen und das Skript neu starten. Andere Sprache: Kürzel statt `de` (`en`, `fr`, …).
+3. **Transcribe.** `node scripts/transcribe.mjs <name>-raw.mp4` writes word timestamps to
+   `public/<name>-raw-captions.json`. On the first run the script downloads whisper.cpp and the speech
+   model (about 1.5 GB); tell the user beforehand. Never create the `whisper.cpp/` folder by hand and never
+   put a model into it in advance: if the folder exists without a built program, the installation stops.
+   In that case delete the folder and run the script again. The language is detected automatically; pass
+   its code for better accuracy, e.g. `node scripts/transcribe.mjs <name>-raw.mp4 de` (`en`, `fr`, …).
 
-4. **Schneiden.** Aus den Wortzeiten die Teile bestimmen, die bleiben: Pausen über 0,5 s raus,
-   Versprecher und doppelt gesprochene Sätze raus (beim Neuansatz bleibt der letzte Versuch). Vor jedem
-   Teil 0,08 s und nach jedem Teil 0,15 s Luft lassen, damit kein Wort abgeschnitten wird. Die Schnittliste
-   dem Nutzer in zwei, drei Sätzen nennen. Zusammensetzen nur mit dem concat-Filter:
+4. **Cut.** From the word timestamps, decide which parts stay: pauses over 0.5 s go, slips and sentences
+   spoken twice go (on a restart, keep the last attempt). Leave 0.08 s before and 0.15 s after each part so
+   no word gets clipped. Summarise the cut list for the user in two or three sentences. Join the parts only
+   with the concat filter:
 
    ```bash
-   ffmpeg -i public/<name>-roh.mp4 -filter_complex \
+   ffmpeg -i public/<name>-raw.mp4 -filter_complex \
      "[0:v]trim=start=1.20:end=4.80,setpts=PTS-STARTPTS[v0];[0:a]atrim=start=1.20:end=4.80,asetpts=PTS-STARTPTS[a0]; \
       [0:v]trim=start=5.60:end=9.10,setpts=PTS-STARTPTS[v1];[0:a]atrim=start=5.60:end=9.10,asetpts=PTS-STARTPTS[a1]; \
       [v0][a0][v1][a1]concat=n=2:v=1:a=1[v][a]" \
      -map "[v]" -map "[a]" -c:v libx264 -crf 18 -c:a aac -b:a 192k public/<name>.mp4
    ```
 
-   Danach den geschnittenen Film neu abtippen (`node scripts/transcribe.mjs <name>.mp4 de`): Alle Zeiten
-   ab hier beziehen sich auf `<name>.mp4`. Will der Nutzer keinen Schnitt, die Rohfassung unter `<name>.mp4`
-   weiterverwenden.
+   Then transcribe the cut video again (`node scripts/transcribe.mjs <name>.mp4`): from here on all times
+   refer to `<name>.mp4`. If the user does not want a cut, keep using the raw version as `<name>.mp4`.
 
-5. **Effekte festlegen.** Im Text die Stellen suchen, an denen der Nutzer einen Effekt nennt oder
-   beschreibt („jetzt zerspringt das Bild“ = `glas`). Pro Effekt ein Cue: `from` kurz vor dem Wort,
-   `to` beim nächsten Effekt oder nach rund 2 bis 3 s, `at` = Sekunden ab `from` bis zum Zündwort. Nennt
-   der Nutzer keinen Effekt, aber will welche, passende vorschlagen. Die Liste als kurze Tabelle
-   zeigen: Effekt, Zeitpunkt, Wort.
+5. **Pick the effects.** Find the places in the transcript where the user names or describes an effect
+   ("now the picture shatters" = `glass`). One cue per effect: `from` just before the word, `to` at the next
+   effect or after about 2 to 3 s, `at` = seconds from `from` to the trigger word. If the user names no
+   effect but wants some, suggest suitable ones. Show the list as a short table: effect, time, word.
 
-6. **Zutaten besorgen** (Spalte Zutaten im Katalog):
-   - **Gesichtsmitte** (`face`): Ein Standbild ziehen
-     (`ffmpeg -ss <t> -i public/<name>.mp4 -frames:v 1 .cache/face.png`), ansehen und die Mitte des
-     Gesichts in Bildpunkten ablesen. Einmal pro Video reicht, wenn die Person ruhig steht. Jeder Cue
-     bekommt dieses `face`: Daran richten sich Zoompunkte und die Lage von Texten aus, damit nichts auf dem
-     Gesicht liegt. Am selben Bild das Kinn ablesen und `captionsTop` in `project.ts` rund 40 Bildpunkte
-     darunter setzen (Standard 1170 passt nur, wenn das Kinn bei etwa 1130 liegt).
-   - **Leeres Zimmer** (`plate`, für `text`, `schlagzeilen`, `dolly`): Am besten hat der Nutzer zwei
-     Sekunden ohne sich selbst gefilmt, bei gleicher Kamera. Sonst fragen, ob er das nachholt, oder mit
-     einem Bildwerkzeug die Person aus einem Standbild entfernen. Ohne `plate` laufen die Effekte mit dem
-     Kamerabild weiter.
-   - **Fotos** (`src` bei `greenscreen`, `studio`): beim Nutzer erfragen. Ohne Foto zeigt Green Screen
-     einen Abendhimmel und Studio-Reveal einen dunklen Raum.
-   - **Standbild für `glas`**: `ffmpeg -ss <from> -i public/<name>.mp4 -frames:v 1 public/<name>-glas.jpg`.
+6. **Gather the ingredients** (column Ingredients in the catalog):
+   - **Face centre** (`face`): grab a still
+     (`ffmpeg -ss <t> -i public/<name>.mp4 -frames:v 1 .cache/face.png`), look at it and read off the
+     centre of the face in pixels. Once per video is enough if the person stands still. Every cue gets
+     this `face`: zoom points and the position of texts follow it, so nothing covers the face. On the same
+     still, read off the chin and set `captionsTop` in `project.ts` about 40 pixels below it (the default
+     1170 only fits if the chin is at about 1130).
+   - **Empty room** (`plate`, for `text`, `headlines`, `dolly`): ideally the user filmed two seconds
+     without themselves, with the same camera position. Otherwise ask whether they can add that, or remove
+     the person from a still with an image tool. Without `plate` the effects keep running on the camera
+     frame.
+   - **Photos** (`src` for `greenscreen`, `studio`): ask the user. Without a photo, the green screen shows
+     an evening sky and the studio reveal shows a dark room.
+   - **Still for `glass`**: `ffmpeg -ss <from> -i public/<name>.mp4 -frames:v 1 public/<name>-glass.jpg`.
 
-7. **Freistellen**, sobald ein Effekt mit „Frei“ dabei ist: nach [freistellung.md](freistellung.md). Das
-   rechnet der Rechner selbst und dauert fünf- bis zehnmal so lang wie das Video. Vorher ansagen.
+7. **Cut out the person** as soon as an effect marked "Cut-out" is used: follow [matting.md](matting.md).
+   The computer does this itself and it takes five to ten times as long as the video. Tell the user
+   beforehand.
 
-8. **`src/project.ts` schreiben.** `video`, `cutout`, `captionsFile`, `captionsTop`, `fps` und `durationInSeconds`
-   (beide mit `ffprobe` aus `<name>.mp4` lesen), `effects` mit `total` = Zahl der nummerierten Effekte.
-   Farben ändert `theme` (Felder in `src/effects/theme.tsx`), Texte die Felder `word`, `lines`,
-   `prompt`, `badge`, `handle`, `avatar` je Cue. Dann `npm run typecheck`.
+8. **Write `src/project.ts`.** `video`, `cutout`, `captionsFile`, `captionsTop`, `fps` and
+   `durationInSeconds` (read both from `<name>.mp4` with `ffprobe`), `effects` with `total` = number of
+   numbered effects. `theme` changes colours (fields in `src/effects/theme.tsx`); the fields `word`,
+   `lines`, `prompt`, `badge`, `handle`, `avatar` change texts per cue. Write texts in the language of the
+   video. Then run `npm run typecheck`.
 
-9. **Standbilder prüfen, bevor gerendert wird.** `node scripts/stills.mjs .cache/stills <t1,t2,…>` mit
-   je einem Zeitpunkt kurz nach jedem Zündwort. Jedes Bild ansehen. Fertig erst, wenn auf keinem Bild Text
-   auf dem Gesicht liegt, keine Person doppelt zu sehen ist und kein Saum um die Freistellung steht.
-   Sonst `face`, `at` oder die Zeiten anpassen und wieder prüfen.
+9. **Check stills before rendering.** `node scripts/stills.mjs .cache/stills <t1,t2,…>` with one time
+   shortly after each trigger word. Look at every image. Done only when no image has text on the face, no
+   person shows twice and there is no halo around the cut-out. Otherwise adjust `face`, `at` or the times
+   and check again.
 
-10. **Rendern.** `npx remotion render src/index.ts EffectsVideo out/<name>-effekte.mp4`. Zum Schluss dem
-    Nutzer sagen, wo die Datei liegt, wie lang sie ist und welche Effekte drin sind. Zum Feinschliff
-    `npm run studio` nennen: Dort sieht er das Video im Browser und kann vor- und zurückspulen.
+10. **Render.** `npx remotion render src/index.ts EffectsVideo out/<name>-effects.mp4`. At the end tell the
+    user where the file is, how long it is and which effects are in it. For fine-tuning, mention
+    `npm run studio`: there they can watch the video in the browser and scrub back and forth.
 
-## Fallen
+## Pitfalls
 
-- **Ein Bild Versatz zwischen Video und Freistellung** ergibt zwei Köpfe bei jeder schnellen Bewegung.
-  Ursache ist fast immer der concat-Demuxer (`-f concat`). Darum nur der concat-Filter, und die
-  Freistellung immer aus genau der Datei rechnen, die in `video` steht.
-- **Text, Badge oder Zahlen nie aufs Gesicht.** Platz an `face` ausrichten; die Untertitel stehen ab
-  y 1170 unter dem Kinn.
-- **Hinter stark bewegter Freistellung das leere Zimmer zeigen** (`plate`), dann kann es keinen zweiten
-  Kopf geben.
-- **Kein Rechteck um den Kopf schneiden**, das ergibt gerade Kanten. Die Maske selbst sauber machen
-  (Schwelle und Einzug in `scripts/make-cutout.sh`).
-- **Querformat** füllt das Hochformat nur mit Zuschnitt. Steht die Person nicht in der Mitte, beim
-  Vorbereiten `crop=1080:1920:<x>:0` mit passendem x setzen.
+- **One frame of offset between video and cut-out** gives two heads on every fast movement. The cause is
+  almost always the concat demuxer (`-f concat`). So use only the concat filter, and always compute the
+  cut-out from exactly the file listed in `video`.
+- **Never put text, badges or numbers on the face.** Align space with `face`; the captions start below
+  the chin at `captionsTop`.
+- **Behind a cut-out that moves a lot, show the empty room** (`plate`); then there can be no second head.
+- **Do not clip a rectangle around the head**, it gives straight edges. Clean up the matte itself
+  (threshold and erosion in `scripts/make-cutout.sh`).
+- **Landscape footage** only fills the vertical frame with a crop. If the person is not centred, set
+  `crop=1080:1920:<x>:0` with a suitable x when preparing.

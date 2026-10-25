@@ -3,7 +3,7 @@
 usage: rvm-alpha.py <rvm_repo> <weights.pth> <variant> <input.mp4> <out_alpha_png_dir> [downsample]
 
 <variant> is resnet50 (cleaner edges) or mobilenetv3 (faster). RobustVideoMatting itself is
-GPL-3.0 and is downloaded separately, see skill/freistellung.md.
+GPL-3.0 and is downloaded separately, see skill/matting.md.
 """
 import sys
 

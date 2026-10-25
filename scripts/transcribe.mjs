@@ -1,5 +1,5 @@
 // Word timestamps for captions and effect timing.
-// usage: node scripts/transcribe.mjs <video in public/> [language=de] [model=medium]
+// usage: node scripts/transcribe.mjs <video in public/> [language=auto] [model=medium]
 // Writes public/<name>-captions.json (Caption[] from @remotion/captions).
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -7,9 +7,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { downloadWhisperModel, installWhisperCpp, toCaptions, transcribe } from "@remotion/install-whisper-cpp";
 
-const [input, language = "de", model = "medium"] = process.argv.slice(2);
+const [input, language = "auto", model = "medium"] = process.argv.slice(2);
 if (!input) {
-  console.error("usage: node scripts/transcribe.mjs <video in public/> [language=de] [model=medium]");
+  console.error("usage: node scripts/transcribe.mjs <video in public/> [language=auto] [model=medium]");
   process.exit(1);
 }
 

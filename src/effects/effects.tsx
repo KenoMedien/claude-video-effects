@@ -10,28 +10,28 @@ import { HEIGHT, WIDTH, rgba, useTheme } from "./theme";
  * underneath shows through. Every video element here is muted: the sound comes from the base video.
  */
 export type EffectKind =
-  | "vorschau"
+  | "preview"
   | "greenscreen"
-  | "magazin"
+  | "magazine"
   | "chat"
-  | "kurve"
-  | "glas"
+  | "curve"
+  | "glass"
   | "orbit"
   | "dolly"
-  | "papier"
-  | "schlagzeilen"
-  | "handy"
+  | "paper"
+  | "headlines"
+  | "phone"
   | "snap"
   | "studio"
   | "liquid"
   | "portal"
   | "broll"
   | "text"
-  | "sucher"
-  | "rahmen"
-  | "zoomschnitt"
-  | "haekchen"
-  | "checkliste";
+  | "viewfinder"
+  | "frame"
+  | "zoomcut"
+  | "checks"
+  | "checklist";
 
 export type EffectCue = {
   kind: EffectKind;
@@ -49,17 +49,17 @@ export type EffectCue = {
   src?: string;
   /** Still of the empty room in public/, shown behind the cut-out instead of the camera frame. */
   plate?: string;
-  /** `text`: the word behind you. `magazin`: the masthead. `checkliste`: the closing line. */
+  /** `text`: the word behind you. `magazine`: the masthead. `checklist`: the closing line. */
   word?: string;
-  /** Text lines of `schlagzeilen`, `haekchen`, `chat` (steps), `magazin` (cover lines), `kurve` (two labels). */
+  /** Text lines of `headlines`, `checks`, `chat` (steps), `magazine` (cover lines), `curve` (two labels). */
   lines?: string[];
   /** `chat`: the message in the bubble. */
   prompt?: string;
-  /** `magazin`: text on the round badge. `chat`: small chip next to the name. */
+  /** `magazine`: text on the round badge. `chat`: small chip next to the name. */
   badge?: string;
-  /** `handy`: profile picture in public/. Without it a coloured circle with the first letter shows. */
+  /** `phone`: profile picture in public/. Without it a coloured circle with the first letter shows. */
   avatar?: string;
-  /** `handy`: account name next to the profile picture. */
+  /** `phone`: account name next to the profile picture. */
   handle?: string;
 };
 
@@ -169,7 +169,7 @@ const EffectHeader: React.FC<{ cue: EffectCue; t: number; total: number; enter: 
 /* Hook preview: all effect names pop up above the head                                         */
 /* ------------------------------------------------------------------------------------------ */
 
-const Vorschau: React.FC<Ctx> = ({ t, d, cue, source, names }) => {
+const Preview: React.FC<Ctx> = ({ t, d, cue, source, names }) => {
   const theme = useTheme();
   const at = cue.at ?? 0.3;
   const out = ramp(t, d - 0.25, d, 1, 0);
@@ -246,7 +246,7 @@ const Barcode: React.FC = () => {
   );
 };
 
-const Magazin: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
+const Magazine: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
   const theme = useTheme();
   const mast = ramp(t, 0, 0.3, 0, 1, EASE_SLAM);
   const enter = (at: number) => ({ opacity: ramp(t, at, at + 0.2), translate: `${((1 - ramp(t, at, at + 0.3)) * -40).toFixed(1)}px 0px` });
@@ -283,14 +283,14 @@ const Magazin: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
       </div>
       {cutout ? <Cam src={cutout} transparent style={{ filter: "drop-shadow(0 24px 40px rgba(10,10,12,0.25))" }} /> : null}
       <div style={{ position: "absolute", top: 336, left: 130, right: 250, display: "flex", justifyContent: "space-between", fontFamily: theme.font, fontWeight: 700, fontSize: 22, letterSpacing: "0.14em", color: theme.ink, opacity: mast }}>
-        <span>DIE KI AUSGABE</span>
-        <span>NR. 01</span>
+        <span>THE AI ISSUE</span>
+        <span>NO. 01</span>
       </div>
       <div style={{ position: "absolute", left: 110, top: 640, width: column, fontFamily: theme.font, color: theme.ink }}>
-        <div style={{ ...enter(0.15), fontSize: 24, fontWeight: 800, letterSpacing: "0.12em", color: theme.accent }}>{line(cue, 0, "TITELSTORY")}</div>
+        <div style={{ ...enter(0.15), fontSize: 24, fontWeight: 800, letterSpacing: "0.12em", color: theme.accent }}>{line(cue, 0, "COVER STORY")}</div>
         <div style={{ ...enter(0.22), fontSize: 130, fontWeight: 900, lineHeight: 0.95, letterSpacing: "-0.04em" }}>{line(cue, 1, "21")}</div>
-        <div style={{ ...enter(0.3), fontSize: 36, fontWeight: 800, lineHeight: 1.08 }}>{line(cue, 2, "Effekte. Ein Prompt.")}</div>
-        <div style={{ ...enter(0.38), marginTop: 18, fontSize: 26, fontWeight: 700, lineHeight: 1.12 }}>{line(cue, 3, "Claude schneidet jetzt Videos")}</div>
+        <div style={{ ...enter(0.3), fontSize: 36, fontWeight: 800, lineHeight: 1.08 }}>{line(cue, 2, "Effects. One prompt.")}</div>
+        <div style={{ ...enter(0.38), marginTop: 18, fontSize: 26, fontWeight: 700, lineHeight: 1.12 }}>{line(cue, 3, "Claude now edits videos")}</div>
       </div>
       <div
         style={{
@@ -316,7 +316,7 @@ const Magazin: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
           boxShadow: "0 12px 30px rgba(10,10,12,0.35)",
         }}
       >
-        {cue.badge ?? "NEU"}
+        {cue.badge ?? "NEW"}
       </div>
       <div style={{ position: "absolute", left: 870, top: 1010, opacity: ramp(t, 0.45, 0.6) }}>
         <Barcode />
@@ -339,9 +339,9 @@ const Chat: React.FC<Ctx> = ({ t, cue, source, seconds }) => {
   const lerp = (a: number, b: number) => a + (b - a) * p;
   const win = ramp(t, 0.1, 0.45);
   const steps = [
-    { at: 1.2, label: line(cue, 0, "Pausen rausschneiden") },
-    { at: 1.5, label: line(cue, 1, "Jedes Wort untertiteln") },
-    { at: 1.8, label: line(cue, 2, "Effekte einbauen") },
+    { at: 1.2, label: line(cue, 0, "Cut the pauses") },
+    { at: 1.5, label: line(cue, 1, "Caption every word") },
+    { at: 1.8, label: line(cue, 2, "Add the effects") },
   ];
   const reply = ramp(t, 0.85, 1.05);
   return (
@@ -356,13 +356,13 @@ const Chat: React.FC<Ctx> = ({ t, cue, source, seconds }) => {
         </div>
         <div style={{ position: "absolute", ...BUBBLE, borderRadius: 30, background: "#fff", boxShadow: "0 8px 22px rgba(10,10,12,0.1)" }} />
         <div style={{ position: "absolute", left: 395, top: 500, width: 410, fontSize: 36, fontWeight: 600, lineHeight: 1.28, opacity: ramp(t, 0.25, 0.5) }}>
-          {cue.prompt ?? "Schneide dieses Video, setz Untertitel für jedes Wort und bau diese Effekte ein."}
+          {cue.prompt ?? "Edit this video, caption every word and add these effects."}
         </div>
       </div>
       <div style={{ position: "absolute", left: 145, top: 905, opacity: reply, display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 38, fontWeight: 700 }}>
           <Spark size={42} color={theme.accent} />
-          Mach ich.
+          On it.
         </div>
         {steps.map((step) => (
           <div key={step.label} style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 32, fontWeight: 600, opacity: ramp(t, step.at - 0.15, step.at) }}>
@@ -395,7 +395,7 @@ const Chat: React.FC<Ctx> = ({ t, cue, source, seconds }) => {
 
 const CURVE = "M156 1000 C306 998 456 990 562 965 C675 937 750 770 785 372";
 
-const Kurve: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
+const Curve: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
   const theme = useTheme();
   const at = cue.at ?? 0.83;
   // Flat part first, then the steep climb on the trigger word.
@@ -432,10 +432,10 @@ const Kurve: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
         <circle cx={785} cy={372} r={40 * peak} fill={theme.glow} opacity={0.35} filter="url(#curve-soft)" />
       </svg>
       <div style={{ ...pill, left: 139, top: 924, height: 54, padding: "0 26px", fontSize: 30, fontWeight: 600, color: theme.paper, background: rgba(theme.ink, 0.55), border: `2px solid ${rgba(theme.glow, 0.45)}` }}>
-        {line(cue, 0, "vorher")}
+        {line(cue, 0, "before")}
       </div>
       <div style={{ ...pill, right: 322, top: 350, height: 76, padding: "0 32px", fontSize: 40, fontWeight: 800, color: theme.ink, background: theme.glow, opacity: peak, scale: `${0.7 + 0.3 * peak}` }}>
-        {line(cue, 1, "mit Claude")}
+        {line(cue, 1, "with Claude")}
       </div>
       {cutout ? <Cam src={cutout} transparent style={{ filter: `drop-shadow(0 0 40px ${rgba(theme.glow, 0.25)})` }} /> : null}
     </AbsoluteFill>
@@ -509,7 +509,7 @@ const FrozenFrame: React.FC<{ cue: EffectCue; source: string }> = ({ cue, source
   );
 };
 
-const Glas: React.FC<Ctx> = ({ t, cue, source }) => {
+const Glass: React.FC<Ctx> = ({ t, cue, source }) => {
   const impact = cue.face ? { x: cue.face.x + 190, y: cue.face.y - 40 } : { x: 760, y: 760 };
   const { shards, cracks } = buildShards(impact);
   const breakAt = cue.at ?? 0.38;
@@ -684,7 +684,7 @@ const Star: React.FC<{ size: number; color: string }> = ({ size, color }) => (
   </svg>
 );
 
-const Papier: React.FC<Ctx> = ({ t, source, cutout }) => {
+const Paper: React.FC<Ctx> = ({ t, source, cutout }) => {
   const theme = useTheme();
   const pop = (at: number) => ramp(t, at, at + 0.28, 0, 1, EASE_SLAM);
   const settle = ramp(t, 0, 0.3, 0, 1, EASE_SLAM);
@@ -716,14 +716,14 @@ const Papier: React.FC<Ctx> = ({ t, source, cutout }) => {
 /* Headline storm: breaking-news bands fly in and run behind you                               */
 /* ------------------------------------------------------------------------------------------ */
 
-const HEADLINE_DEFAULTS = ["CLAUDE SCHNEIDET JETZT VIDEOS", "21 EFFEKTE, EIN PROMPT", "JEDES WORT UNTERTITELT", "ROHVIDEO REIN, REEL RAUS", "GESCHNITTEN MIT CLAUDE"];
-const HEADLINE_TAGS = ["EILMELDUNG", "NEU", "LIVE", "EILMELDUNG", "NEU"];
+const HEADLINE_DEFAULTS = ["CLAUDE NOW EDITS VIDEOS", "21 EFFECTS, ONE PROMPT", "EVERY WORD CAPTIONED", "RAW CLIP IN, REEL OUT", "EDITED WITH CLAUDE"];
+const HEADLINE_TAGS = ["BREAKING", "NEW", "LIVE", "BREAKING", "NEW"];
 const HEADLINE_ROT = [-7, 5, -4, 6, -6];
 /** With a cut-out the bands may run at head height, because you stand in front of them. */
 const HEADLINE_ROWS_CUTOUT = [430, 600, 760, 920, 1080];
 const HEADLINE_ROWS_FLAT = [360, 470, 575, 1010, 1110];
 
-const Schlagzeilen: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
+const Headlines: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
   const theme = useTheme();
   const rows = cutout ? HEADLINE_ROWS_CUTOUT : HEADLINE_ROWS_FLAT;
   const texts = (cue.lines?.length ? cue.lines : HEADLINE_DEFAULTS).slice(0, 5);
@@ -770,13 +770,13 @@ const ReelsIcon: React.FC<{ d: string }> = ({ d }) => (
   </svg>
 );
 
-const Handy: React.FC<Ctx> = ({ t, cue, source, seconds }) => {
+const Phone: React.FC<Ctx> = ({ t, cue, source, seconds }) => {
   const theme = useTheme();
   const p = ramp(t, 0, 0.5, 0, 1, EASE_OUT_POW4);
   const screen = { left: PHONE.left + PHONE.bezel, top: PHONE.top + PHONE.bezel, width: PHONE.width - PHONE.bezel * 2, height: PHONE.height - PHONE.bezel * 2 };
   const lerp = (a: number, b: number) => a + (b - a) * p;
   const ui = ramp(t, 0.45, 0.7);
-  const handle = cue.handle ?? "deinname";
+  const handle = cue.handle ?? "yourname";
   const avatar: CSSProperties = { width: 40, height: 40, borderRadius: "50%", border: "2px solid #fff" };
   return (
     <AbsoluteFill>
@@ -822,7 +822,7 @@ const Handy: React.FC<Ctx> = ({ t, cue, source, seconds }) => {
               <div style={{ ...avatar, background: theme.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800 }}>{handle.charAt(0).toUpperCase()}</div>
             )}
             {handle}
-            <span style={{ border: "1.5px solid #fff", borderRadius: 8, padding: "2px 10px", fontSize: 18 }}>Folgen</span>
+            <span style={{ border: "1.5px solid #fff", borderRadius: 8, padding: "2px 10px", fontSize: 18 }}>Follow</span>
           </div>
           <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 4, background: "rgba(255,255,255,0.35)" }}>
             <div style={{ width: `${Math.min(100, t * 30).toFixed(1)}%`, height: "100%", background: "#fff" }} />
@@ -1011,7 +1011,7 @@ const BRoll: React.FC<Ctx> = ({ t, d, cue, source }) => {
             <div key={c} style={{ width: 18, height: 18, borderRadius: "50%", background: c }} />
           ))}
         </div>
-        <div style={{ position: "absolute", left: 139, top: 380, fontSize: 34, fontWeight: 800 }}>Schnitt</div>
+        <div style={{ position: "absolute", left: 139, top: 380, fontSize: 34, fontWeight: 800 }}>Editor</div>
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
@@ -1041,7 +1041,7 @@ const BRoll: React.FC<Ctx> = ({ t, d, cue, source }) => {
           </div>
         ))}
         <div style={{ position: "absolute", left: timeline.left + 90, top: timeline.top + 120, width: 690, height: 64, borderRadius: 10, background: rgba(theme.deep, 0.75), color: "#fff", fontSize: 24, fontWeight: 700, display: "flex", alignItems: "center", paddingLeft: 18 }}>
-          Sprechvideo
+          Talking head
         </div>
         {dropped ? (
           <div style={{ position: "absolute", left: head - 120, top: timeline.top + 30 + drop, width: 260, height: 64, borderRadius: 10, background: theme.accent, color: "#fff", fontSize: 24, fontWeight: 800, display: "flex", alignItems: "center", paddingLeft: 18 }}>
@@ -1058,7 +1058,7 @@ const BRoll: React.FC<Ctx> = ({ t, d, cue, source }) => {
 /* Text behind you: a huge word between the room and you                                       */
 /* ------------------------------------------------------------------------------------------ */
 
-const TextHinter: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
+const TextBehind: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
   const theme = useTheme();
   const at = cue.at ?? 0;
   const p = ramp(t, at, at + 0.3, 0, 1, EASE_SLAM);
@@ -1103,7 +1103,7 @@ const TextHinter: React.FC<Ctx> = ({ t, cue, source, cutout }) => {
 /* Viewfinder with digital zoom                                                                */
 /* ------------------------------------------------------------------------------------------ */
 
-const Sucher: React.FC<Ctx> = ({ t, cue, source, seconds }) => {
+const Viewfinder: React.FC<Ctx> = ({ t, cue, source, seconds }) => {
   const theme = useTheme();
   const { fps } = useVideoConfig();
   const showAt = cue.at ?? 0.8;
@@ -1147,7 +1147,7 @@ const Sucher: React.FC<Ctx> = ({ t, cue, source, seconds }) => {
 /* Frame escape: the video becomes a tilted card, the head climbs out over its top edge        */
 /* ------------------------------------------------------------------------------------------ */
 
-const Rahmen: React.FC<Ctx> = ({ t, cue, source, cutout, seconds }) => {
+const FrameEscape: React.FC<Ctx> = ({ t, cue, source, cutout, seconds }) => {
   const p = ramp(t, 0, 0.5, 0, 1, EASE_OUT_POW4);
   const climb = ramp(t, 0.35, 0.95, 0, 1, EASE_OUT);
   const face = faceOf(cue);
@@ -1189,7 +1189,7 @@ const Rahmen: React.FC<Ctx> = ({ t, cue, source, cutout, seconds }) => {
 /* Zoom-through cut                                                                            */
 /* ------------------------------------------------------------------------------------------ */
 
-const Zoomschnitt: React.FC<Ctx> = ({ t, cue, source }) => {
+const ZoomCut: React.FC<Ctx> = ({ t, cue, source }) => {
   const at = cue.at ?? 0.25;
   const inP = ramp(t, at, at + 0.22, 0, 1, EASE_IN_POW4);
   const outP = ramp(t, at + 0.22, at + 0.52, 0, 1, EASE_OUT_POW4);
@@ -1211,10 +1211,10 @@ const Zoomschnitt: React.FC<Ctx> = ({ t, cue, source }) => {
 /* Check pills pop up next to you                                                              */
 /* ------------------------------------------------------------------------------------------ */
 
-const Haekchen: React.FC<Ctx> = ({ t, cue, source }) => {
+const Checks: React.FC<Ctx> = ({ t, cue, source }) => {
   const theme = useTheme();
   const at = cue.at ?? 0.5;
-  const pills = (cue.lines?.length ? cue.lines : ["Geschnitten", "Untertitelt", "Effekte drin"]).slice(0, 4);
+  const pills = (cue.lines?.length ? cue.lines : ["Edited", "Captioned", "Effects in"]).slice(0, 4);
   // Stack ends just above the cap; never higher than y 340, below the header row.
   const top = Math.max(340, faceOf(cue).y - 420 - pills.length * 104);
   return (
@@ -1257,9 +1257,9 @@ const Haekchen: React.FC<Ctx> = ({ t, cue, source }) => {
 /* Checklist: every effect of the video gets ticked off, a counter runs along                  */
 /* ------------------------------------------------------------------------------------------ */
 
-const Checkliste: React.FC<Ctx> = ({ t, d, cue, source, names }) => {
+const Checklist: React.FC<Ctx> = ({ t, d, cue, source, names }) => {
   const theme = useTheme();
-  const items = names.length ? names : ["Geschnitten", "Untertitelt", "Effekte drin"];
+  const items = names.length ? names : ["Edited", "Captioned", "Effects in"];
   const rise = ramp(t, 0, 0.3, HEIGHT, 0, EASE_OUT_POW4);
   const start = 0.3;
   // Tick all rows within the first ~60 % of the window, at most 0.115 s apart.
@@ -1274,7 +1274,7 @@ const Checkliste: React.FC<Ctx> = ({ t, d, cue, source, names }) => {
       <div style={{ ...FULL, translate: `0px ${rise.toFixed(1)}px`, background: `linear-gradient(160deg, ${theme.light} 0%, ${theme.sand} 100%)`, fontFamily: theme.font, color: theme.ink }}>
         <div style={{ position: "absolute", left: 139, top: 346, display: "flex", alignItems: "baseline", gap: 16 }}>
           <span style={{ fontSize: 150, fontWeight: 900, color: theme.accent, lineHeight: 1 }}>{t < start ? 0 : done}</span>
-          <span style={{ fontSize: 44, fontWeight: 700 }}>/ {items.length} Effekte</span>
+          <span style={{ fontSize: 44, fontWeight: 700 }}>/ {items.length} effects</span>
         </div>
         {items.map((name, i) => {
           const tick = ramp(t, start + i * step, start + i * step + 0.12);
@@ -1293,7 +1293,7 @@ const Checkliste: React.FC<Ctx> = ({ t, d, cue, source, names }) => {
         })}
         <div style={{ position: "absolute", left: 139, top: 1080, display: "flex", alignItems: "center", gap: 14, fontSize: 44, fontWeight: 800, opacity: ramp(t, finalAt, finalAt + 0.2), scale: `${ramp(t, finalAt, finalAt + 0.25, 0.85, 1, EASE_SLAM)}`, transformOrigin: "left center" }}>
           <Spark size={48} color={theme.accent} />
-          {cue.word ?? "Alle Effekte drin."}
+          {cue.word ?? "All effects in."}
         </div>
       </div>
     </AbsoluteFill>
@@ -1303,28 +1303,28 @@ const Checkliste: React.FC<Ctx> = ({ t, d, cue, source, names }) => {
 /* ------------------------------------------------------------------------------------------ */
 
 const RENDERERS: Record<EffectKind, React.FC<Ctx>> = {
-  vorschau: Vorschau,
+  preview: Preview,
   greenscreen: GreenScreen,
-  magazin: Magazin,
+  magazine: Magazine,
   chat: Chat,
-  kurve: Kurve,
-  glas: Glas,
+  curve: Curve,
+  glass: Glass,
   orbit: Orbit,
   dolly: Dolly,
-  papier: Papier,
-  schlagzeilen: Schlagzeilen,
-  handy: Handy,
+  paper: Paper,
+  headlines: Headlines,
+  phone: Phone,
   snap: Snap,
   studio: Studio,
   liquid: Liquid,
   portal: Portal,
   broll: BRoll,
-  text: TextHinter,
-  sucher: Sucher,
-  rahmen: Rahmen,
-  zoomschnitt: Zoomschnitt,
-  haekchen: Haekchen,
-  checkliste: Checkliste,
+  text: TextBehind,
+  viewfinder: Viewfinder,
+  frame: FrameEscape,
+  zoomcut: ZoomCut,
+  checks: Checks,
+  checklist: Checklist,
 };
 
 export const EffectLayer: React.FC<{ spec: EffectsSpec; seconds: number; source: string; cutout?: string }> = ({ spec, seconds, source, cutout }) => {

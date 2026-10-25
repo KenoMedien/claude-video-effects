@@ -8,7 +8,7 @@ import "./fonts";
 export type EffectsVideoProps = {
   /** Video in public/, already cut and in portrait format. */
   video: string;
-  /** Transparent cut-out (WebM with alpha) of the same video in public/, needed by the "Frei" effects. */
+  /** Transparent cut-out (WebM with alpha) of the same video in public/, needed by the cut-out effects. */
   cutout?: string;
   /** Word timestamps in public/ (JSON, Caption[] from scripts/transcribe.mjs). Loaded in Root.tsx. */
   captionsFile?: string;
@@ -22,7 +22,7 @@ export type EffectsVideoProps = {
 
 const Placeholder: React.FC = () => (
   <AbsoluteFill style={{ background: "#0a0a0c", color: "#f4f2ee", fontFamily: DEFAULT_THEME.font, alignItems: "center", justifyContent: "center", textAlign: "center", padding: 120, fontSize: 48, lineHeight: 1.3 }}>
-    Noch kein Video eingetragen. Leg dein Video in public/ und trag den Dateinamen in src/project.ts ein.
+    No video set yet. Put your video in public/ and enter its file name in src/project.ts.
   </AbsoluteFill>
 );
 
